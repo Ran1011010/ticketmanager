@@ -6,6 +6,7 @@ export default function Home() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    contract: "",
     issue: "",
   });
 
@@ -21,7 +22,7 @@ export default function Home() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">REPORTE DE INCIDENCIAS TPF</h1>
+      <h1 className="text-2xl font-bold mb-4">Mesa de Atención Informática TPF</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block font-medium">Nombre</label>
@@ -40,6 +41,17 @@ export default function Home() {
             type="email"
             name="email"
             value={formData.email}
+            onChange={handleChange}
+            className="border p-2 w-full"
+            required
+          />
+        </div>
+        <div>
+          <label className="block font-medium">Contrato/Oficina</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.contract}
             onChange={handleChange}
             className="border p-2 w-full"
             required

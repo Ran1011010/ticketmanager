@@ -1,3 +1,5 @@
+import './globals.css'
+
 export const metadata = {
   title: "Plataforma de Tickets",
   description: "Sistema para reportar incidencias.",
