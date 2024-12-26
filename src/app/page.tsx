@@ -10,14 +10,38 @@ export default function Home() {
     issue: "",
   });
 
+  const [ loading, setLoading ] = useState(false);
+  const [ message, setMessage ] = useState("");
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit =  async(e: React.FormEvent) => {
     e.preventDefault();
-    console.log(formData); 
-    alert("Formulario enviado (¡Falta conectar la lógica!)");
+    setLoading(true);
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/submit-ticket", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setMessage(data.message);
+        setFormData({ name: "", email: "", issue: "", contract: "" });
+      } else {
+        const error = await response.json();
+        setMessage(error.message || "Hubo un error al enviar el ticket.");
+      }
+    } catch (error) {
+      setMessage("Error de conexión. Intenta nuevamente.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -50,7 +74,7 @@ export default function Home() {
           <label className="block font-medium">Contrato/Oficina</label>
           <input
             type="text"
-            name="name"
+            name="contract"
             value={formData.contract}
             onChange={handleChange}
             className="border p-2 w-full"
@@ -68,8 +92,11 @@ export default function Home() {
             required
           />
         </div>
-        <button type="submit" className="bg-blue-500 text-white p-2 rounded">
-          Enviar
+        <button 
+          type="submit" 
+          className={`p-2 rounded ${loading ? "bg-gray-400" : "bg-blue-500 text-white"}`}
+          >
+          { loading ? "Enviando..." : "Enviar" }
         </button>
       </form>
     </div>
