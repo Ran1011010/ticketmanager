@@ -10,17 +10,76 @@ export default function Home() {
     issue: "",
   });
 
+  const [errors, setErrors] = useState({
+    name: "",
+    email: "",
+    contract: "",
+    issue: "",
+  });
+
   const [ loading, setLoading ] = useState(false);
   const [ message, setMessage ] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const validateFields = () => {
+    const newErrors = { name: "", email: "", contract: "", issue: "" };
+    let isValid = true;
+
+    if (!formData.name.trim()) {
+      newErrors.name = "El nombre es obligatorio.";
+      isValid = false;
+    }else if (formData.name.length < 5 || formData.name.length > 50) {
+      newErrors.name = "El nombre es muy corto o muy largo";
+      isValid = false;
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = "El correo electrónico es obligatorio.";
+      isValid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "El correo electrónico no es válido.";
+      isValid = false;
+    } else if (!/^[^\s@]+@(tpfingenieria\.cl|tpfingenieria\.com)$/.test(formData.email)) {
+      newErrors.email = "El correo electrónico debe ser de dominio @tpfingenieria.cl o @tpfingenieria.com.";
+      isValid = false;
+    }
+    
+
+    if (!formData.contract.trim()) {
+      newErrors.contract = "El contrato o la oficina es obligatorio.";
+      isValid = false;
+    }else if (formData.contract.length < 5 || formData.contract.length > 50) {
+      newErrors.contract = "el nombre de la oficina o contrato es muy corto o muy largo";
+      isValid = false;
+    }
+
+    if (!formData.issue.trim()) {
+      newErrors.issue = "La descripción de la incidencia es obligatoria.";
+      isValid = false;
+    } else if (formData.issue.length < 10 || formData.issue.length > 500) {
+      newErrors.issue = "La descripción debe tener entre 10 y 500 caracteres.";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
   };
 
-  const handleSubmit =  async(e: React.FormEvent) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: "" }); // Limpia errores al escribir
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setMessage("");
+
+    if (!validateFields()) {
+      return; // Detiene el envío si hay errores
+    }
+
+    setLoading(true);
 
     try {
       const response = await fetch("/api/submit-ticket", {
@@ -58,6 +117,7 @@ export default function Home() {
             className="border p-2 w-full"
             required
           />
+          {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
         </div>
         <div>
           <label className="block font-medium">Correo Electrónico</label>
@@ -69,6 +129,7 @@ export default function Home() {
             className="border p-2 w-full"
             required
           />
+          {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
         </div>
         <div>
           <label className="block font-medium">Contrato/Oficina</label>
@@ -80,6 +141,7 @@ export default function Home() {
             className="border p-2 w-full"
             required
           />
+          {errors.contract && <p className="text-red-500 text-sm">{errors.contract}</p>}
         </div>
         <div>
           <label className="block font-medium">Descripción de la Incidencia</label>
@@ -91,6 +153,7 @@ export default function Home() {
             rows={4}
             required
           />
+          {errors.issue && <p className="text-red-500 text-sm">{errors.issue}</p>}
         </div>
         <button 
           type="submit" 
