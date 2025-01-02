@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { QuestionMarkCircleIcon } from "@heroicons/react/solid";
+
 
 export default function Home() {
   const initializeErrors = () => ({
@@ -12,7 +14,7 @@ export default function Home() {
     priority: "",
   });
 
-  const [formData, setFormData] = useState({
+  const initializeFormData = () => ({
     name: "",
     email: "",
     contract: "",
@@ -21,6 +23,7 @@ export default function Home() {
     priority: "",
   });
 
+  const [formData, setFormData] = useState(initializeFormData());
   const [errors, setErrors] = useState(initializeErrors());
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -48,12 +51,12 @@ export default function Home() {
       isValid = false;
     }
 
-    if(formData.contract && !["ITO-L7", "L7t5y6", "MT-OP", "TyC", "EFE-NOS", "VT", "administrativos"].includes(formData.contract)) {
+    if (formData.contract && !["ITO-L7", "L7t5y6", "MT-OP", "TyC", "EFE-NOS", "VT", "administrativos"].includes(formData.contract)) {
       newErrors.contract = "El contrato seleccionado no es válido.";
       isValid = false;
     }
 
-    if(formData.type && !["incidencia", "solicitud"].includes(formData.type)) {
+    if (formData.type && !["incidencia", "solicitud"].includes(formData.type)) {
       newErrors.type = "El tipo seleccionado no es válido.";
       isValid = false;
     }
@@ -102,7 +105,7 @@ export default function Home() {
       if (response.ok) {
         const data = await response.json();
         setMessage('Ticket enviado con éxito.');
-        setFormData({ name: "", email: "", issue: "", contract: "", type: "", priority: "" });
+        setFormData(initializeFormData()); // Reset usando la función
 
         // Limpia el mensaje después de 5 segundos
         setTimeout(() => setMessage(""), 5000);
@@ -121,6 +124,7 @@ export default function Home() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="container max-w-2xl mx-auto p-4">
         <h1 className="text-2xl font-bold mb-4">Genera tu ticket</h1>
+        <QuestionMarkCircleIcon className="h-6 w-6 text-blue-500 inline-block" />
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block font-medium">Nombre y Apellido</label>
@@ -208,6 +212,8 @@ export default function Home() {
             />
             {errors.issue && <p className="text-red-500 text-sm">{errors.issue}</p>}
           </div>
+          
+
           <button
             type="submit"
             className={`p-2 rounded ${loading ? "bg-gray-400 text-black" : "bg-blue-500 text-white"}`}
