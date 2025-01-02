@@ -101,7 +101,7 @@ export default function Home() {
 
       if (response.ok) {
         const data = await response.json();
-        setMessage(data.message);
+        setMessage('Ticket enviado con éxito.');
         setFormData({ name: "", email: "", issue: "", contract: "", type: "", priority: "" });
 
         // Limpia el mensaje después de 5 segundos
@@ -215,7 +215,7 @@ export default function Home() {
             {loading ? "Enviando..." : "Enviar"}
           </button>
         </form>
-        {message && <p className="text-red-500 mt-4">{message}</p>}
+        {message && <p className="text-green-500 mt-4">{message}</p>}
       </div>
     </div>
   );

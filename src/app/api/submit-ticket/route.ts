@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 
-async function sendEmail(name: string, email: string, issue: string, contract: string) {
+async function sendEmail(
+  name: string, 
+  email: string, 
+  issue: string, 
+  contract: string,
+  type: string,
+  priority: string
+) {
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT),
@@ -16,11 +23,23 @@ async function sendEmail(name: string, email: string, issue: string, contract: s
     from: process.env.SMTP_USER,
     to: "javiera.paez@tpfingenieria.cl",
     subject: `Nueva incidencia de ${name}`,
-    text: `Nombre: ${name}\nCorreo: ${email}\nContrato: ${contract}\nIncidencia: ${issue}`,
+    text: `Nombre: ${name}
+          \nCorreo: ${email}
+          \nContrato: ${contract}
+          \nTipo: ${type}
+          \nPrioridad: ${priority}
+          \nDescripcion: ${issue}`,
   });
 }
 
- async function createTrelloCard(name: string, email: string, issue: string, contract: string) {
+ async function createTrelloCard(
+  name: string, 
+  email: string, 
+  issue: string, 
+  contract: string,
+  type: string,
+  priority: string
+) {
   const { TRELLO_API_KEY, TRELLO_API_TOKEN, TRELLO_BOARD_ID, TRELLO_TICKET_LIST_ID } = process.env;
 
    if (!TRELLO_API_KEY || !TRELLO_API_TOKEN || !TRELLO_BOARD_ID || !TRELLO_TICKET_LIST_ID) {
@@ -36,8 +55,13 @@ async function sendEmail(name: string, email: string, issue: string, contract: s
        key: TRELLO_API_KEY,
        token: TRELLO_API_TOKEN,
        idList: TRELLO_TICKET_LIST_ID,
-       name: `Incidencia de ${name}`,
-       desc: `**Nombre:** ${name}\n**Correo:** ${email}\n**Contrato:** ${contract}\n**Incidencia:** ${issue}`,
+       name: `Ticket de ${name}`,
+       desc: `**Nombre:** ${name}
+              \n**Correo:** ${email}
+              \n**Contrato:** ${contract}
+              \n**Tipo:** ${type}
+              \n**Prioridad:** ${priority}
+              \n**Descripcion:** ${issue}`,  
      }),
    });
 
@@ -51,9 +75,9 @@ async function sendEmail(name: string, email: string, issue: string, contract: s
 
 export async function POST(req: Request) {
   try {
-    const { name, email, issue, contract } = await req.json();
+    const { name, email, issue, contract, type, priority} = await req.json();
 
-    if (!name || !email || !issue || !contract) {
+    if (!name || !email || !issue || !contract || !type || !priority) {
       return NextResponse.json(
         { message: "Todos los campos son obligatorios." },
         { status: 400 }
@@ -61,7 +85,7 @@ export async function POST(req: Request) {
     }
 
     try {
-      await sendEmail(name, email, issue, contract);
+      await sendEmail(name, email, issue, contract, type, priority);
       console.log("Correo enviado exitosamente.");
     } catch (emailError) {
       console.error("Error al enviar el correo:", emailError);
@@ -72,7 +96,7 @@ export async function POST(req: Request) {
     }
 
      try {
-       const card = await createTrelloCard(name, email, issue, contract);
+       const card = await createTrelloCard(name, email, issue, contract, type, priority);
        console.log("Tarjeta creada exitosamente:", card);
      } catch (trelloError) {
        console.error("Error al crear la tarjeta en Trello:", trelloError);
