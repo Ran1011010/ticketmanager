@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
+import tpfLogo from '../../public/images/tpfing.png'
 import { useState } from "react";
-import { QuestionMarkCircleIcon } from "@heroicons/react/solid";
-
+import TicketToast from "./components/ticketToast";
 
 export default function Home() {
   const initializeErrors = () => ({
@@ -123,8 +124,13 @@ export default function Home() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="container max-w-2xl mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">Genera tu ticket</h1>
-        <QuestionMarkCircleIcon className="h-6 w-6 text-blue-500 inline-block" />
+        <div className="flex items-center justify-center">
+          <Image src={tpfLogo} alt="TPF Ingeniería" className="rounded m-10" />
+        </div>
+        <h1 className="text-3xl font-bold text-center mb-10 text-gray-700">Genera tu ticket de asistencia</h1>
+
+        {/*<Question className="w-12 h-12 mx-auto" />*/}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block font-medium">Nombre y Apellido</label>
@@ -216,12 +222,12 @@ export default function Home() {
 
           <button
             type="submit"
-            className={`p-2 rounded ${loading ? "bg-gray-400 text-black" : "bg-blue-500 text-white"}`}
+            className={`p-2 rounded ${loading ? "bg-gray-400 text-black" : "bg-blue-500 text-white"} w-full`}
           >
             {loading ? "Enviando..." : "Enviar"}
           </button>
         </form>
-        {message && <p className="text-green-500 mt-4">{message}</p>}
+        {message &&  <TicketToast />}
       </div>
     </div>
   );
