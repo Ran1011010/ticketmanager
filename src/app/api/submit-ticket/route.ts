@@ -21,7 +21,7 @@ async function sendEmail(
 
   await transporter.sendMail({
     from: process.env.SMTP_USER,
-    to: "javiera.paez@tpfingenieria.cl",
+    to: process.env.SMTP_USER_TO,
     subject: `Nueva incidencia de ${name}`,
     text: `Nombre: ${name}
           \nCorreo: ${email}
@@ -86,7 +86,7 @@ export async function POST(req: Request) {
 
     try {
       await sendEmail(name, email, issue, contract, type, priority);
-      console.log("Correo enviado exitosamente.");
+     // console.log("Correo enviado exitosamente.");
     } catch (emailError) {
       console.error("Error al enviar el correo:", emailError);
       return NextResponse.json(
@@ -97,7 +97,7 @@ export async function POST(req: Request) {
 
      try {
        const card = await createTrelloCard(name, email, issue, contract, type, priority);
-       console.log("Tarjeta creada exitosamente:", card);
+      // console.log("Tarjeta creada exitosamente:", card);
      } catch (trelloError) {
        console.error("Error al crear la tarjeta en Trello:", trelloError);
        return NextResponse.json(
