@@ -28,6 +28,17 @@ async function sendEmail(
            \nTipo: ${type}
            \nDescripcion: ${issue}`,
   });
+
+  await transporter.sendMail({
+    from: process.env.SMTP_USER,
+    to: email,
+    subject: "Incidencia enviada",
+    text: `Hola! 
+           \nTu ticket ha sido enviado con éxito. 
+           \nEl equipo de soporte se pondrá en contacto contigo lo antes posible.`,
+  });
+
+  transporter.close();
 }
 
  async function createTrelloCard(
