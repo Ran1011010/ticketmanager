@@ -2,12 +2,12 @@ import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 
 async function sendEmail(
-  name: string, 
-  email: string, 
-  issue: string, 
-  contract: string,
-  type: string,
-  priority: string
+// name: string, 
+   email: string,
+   issue: string, 
+   contract: string, 
+   type: string,
+ // priority: string
 ) {
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -22,13 +22,11 @@ async function sendEmail(
   await transporter.sendMail({
     from: process.env.SMTP_USER,
     to: process.env.SMTP_USER_TO,
-    subject: `Nueva incidencia de ${name}`,
-    text: `Nombre: ${name}
-          \nCorreo: ${email}
-          \nContrato: ${contract}
-          \nTipo: ${type}
-          \nPrioridad: ${priority}
-          \nDescripcion: ${issue}`,
+    subject: `Nueva incidencia de ${email}`,
+    text: `\nCorreo: ${email}
+           \nContrato: ${contract}
+           \nTipo: ${type}
+           \nDescripcion: ${issue}`,
   });
 }
 
@@ -77,7 +75,7 @@ export async function POST(req: Request) {
   try {
     const { name, email, issue, contract, type, priority} = await req.json();
 
-    if (!name || !email || !issue || !contract || !type || !priority) {
+    if (!email || !issue || !contract || !type) {
       return NextResponse.json(
         { message: "Todos los campos son obligatorios." },
         { status: 400 }
@@ -85,7 +83,7 @@ export async function POST(req: Request) {
     }
 
     try {
-      await sendEmail(name, email, issue, contract, type, priority);
+      await sendEmail(email, issue, contract, type);
      // console.log("Correo enviado exitosamente.");
     } catch (emailError) {
       console.error("Error al enviar el correo:", emailError);

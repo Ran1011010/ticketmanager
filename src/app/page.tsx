@@ -7,21 +7,21 @@ import TicketToast from "./components/ticketToast";
 
 export default function Home() {
   const initializeErrors = () => ({
-    name: "",
+   // name: "",
     email: "",
     contract: "",
     type: "",
     issue: "",
-    priority: "",
+   // priority: "",
   });
 
   const initializeFormData = () => ({
-    name: "",
+   // name: "",
     email: "",
     contract: "",
     type: "",
     issue: "",
-    priority: "",
+   // priority: "",
   });
 
   const [formData, setFormData] = useState(initializeFormData());
@@ -33,13 +33,13 @@ export default function Home() {
     const newErrors = initializeErrors();
     let isValid = true;
 
-    if (!formData.name.trim()) {
+   /* if (!formData.name.trim()) {
       newErrors.name = "El nombre es obligatorio.";
       isValid = false;
     } else if (formData.name.length < 5 || formData.name.length > 50) {
       newErrors.name = "El nombre es muy corto o muy largo.";
       isValid = false;
-    }
+    }*/
 
     if (!formData.email.trim()) {
       newErrors.email = "El correo electrónico es obligatorio.";
@@ -70,11 +70,11 @@ export default function Home() {
       isValid = false;
     }
 
-    if (formData.priority && !["baja", "media", "alta"].includes(formData.priority)) {
+  /*  if (formData.priority && !["baja", "media", "alta"].includes(formData.priority)) {
       newErrors.priority = "La prioridad seleccionada no es válida.";
       isValid = false;
     }
-
+  */
     setErrors(newErrors);
     return isValid;
   };
@@ -132,7 +132,7 @@ export default function Home() {
         {/*<Question className="w-12 h-12 mx-auto" />*/}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
+          {/*<div>
             <label className="block font-medium">Nombre y Apellido</label>
             <input
               type="text"
@@ -143,7 +143,7 @@ export default function Home() {
               required
             />
             {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
-          </div>
+          </div>*/}
           <div>
             <label className="block font-medium">Correo Electrónico</label>
             <input
@@ -166,13 +166,13 @@ export default function Home() {
               required
             >
               <option value="">Seleccione contrato</option>
-              <option value="ITO-L7">Sistemas L7</option>
+              <option value="Sis-L7">Sistemas L7</option>
               <option value="L7t5y6">L7 tramo 5 y 6</option>
               <option value="MT-OP">Metro Operacionales</option>
-              <option value="TyC">Talleres y Cocheras L7</option>
+              <option value="Talleres">Talleres y Cocheras L7</option>
               <option value="EFE-NOS">EFE-NOS</option>
-              <option value="VT">Victoria Temuco</option>
-              <option value="administrativos">Administrativos</option>
+              <option value="Victoria-Temuco">Victoria Temuco</option>
+              <option value="Administrativos">Administrativos</option>
             </select>
             {errors.contract && <p className="text-red-500 text-sm">{errors.contract}</p>}
           </div>
@@ -191,7 +191,7 @@ export default function Home() {
             </select>
             {errors.type && <p className="text-red-500 text-sm">{errors.type}</p>}
           </div>
-          <div>
+          {/*<div>
             <label className="block font-medium">Prioridad</label>
             <select
               name="priority"
@@ -205,7 +205,7 @@ export default function Home() {
               <option value="alta">Alta</option>
             </select>
             {errors.priority && <p className="text-red-500 text-sm">{errors.priority}</p>}
-          </div>
+          </div>*/}
           <div>
             <label className="block font-medium">Descripción de la Incidencia</label>
             <textarea
