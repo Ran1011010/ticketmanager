@@ -4,24 +4,26 @@ import Image from "next/image";
 import tpfLogo from '../../public/images/tpfing.png'
 import { useState } from "react";
 import TicketToast from "./components/ticketToast";
+import Navbar from "./components/navbar";
+import Footer from "./components/footer";
 
 export default function Home() {
   const initializeErrors = () => ({
-   // name: "",
+    // name: "",
     email: "",
     contract: "",
     type: "",
     issue: "",
-   // priority: "",
+    // priority: "",
   });
 
   const initializeFormData = () => ({
-   // name: "",
+    // name: "",
     email: "",
     contract: "",
     type: "",
     issue: "",
-   // priority: "",
+    // priority: "",
   });
 
   const [formData, setFormData] = useState(initializeFormData());
@@ -33,13 +35,13 @@ export default function Home() {
     const newErrors = initializeErrors();
     let isValid = true;
 
-   /* if (!formData.name.trim()) {
-      newErrors.name = "El nombre es obligatorio.";
-      isValid = false;
-    } else if (formData.name.length < 5 || formData.name.length > 50) {
-      newErrors.name = "El nombre es muy corto o muy largo.";
-      isValid = false;
-    }*/
+    /* if (!formData.name.trim()) {
+       newErrors.name = "El nombre es obligatorio.";
+       isValid = false;
+     } else if (formData.name.length < 5 || formData.name.length > 50) {
+       newErrors.name = "El nombre es muy corto o muy largo.";
+       isValid = false;
+     }*/
 
     if (!formData.email.trim()) {
       newErrors.email = "El correo electrónico es obligatorio.";
@@ -70,11 +72,11 @@ export default function Home() {
       isValid = false;
     }
 
-  /*  if (formData.priority && !["baja", "media", "alta"].includes(formData.priority)) {
-      newErrors.priority = "La prioridad seleccionada no es válida.";
-      isValid = false;
-    }
-  */
+    /*  if (formData.priority && !["baja", "media", "alta"].includes(formData.priority)) {
+        newErrors.priority = "La prioridad seleccionada no es válida.";
+        isValid = false;
+      }
+    */
     setErrors(newErrors);
     return isValid;
   };
@@ -83,7 +85,7 @@ export default function Home() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" }); // Limpia errores al escribir
+    setErrors({ ...errors, [e.target.name]: "" });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -122,17 +124,20 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="container max-w-2xl mx-auto p-4">
-        <div className="flex items-center justify-center">
-          <Image src={tpfLogo} alt="TPF Ingeniería" className="rounded m-10" />
-        </div>
-        <h1 className="text-3xl font-bold text-center mb-10 text-gray-700">Genera tu ticket de asistencia</h1>
+    <div className="min-h-screen">
+    <Navbar />
+      <div className="flex items-center justify-center bg-gray-100">
 
-        {/*<Question className="w-12 h-12 mx-auto" />*/}
+        <div className="container max-w-2xl mx-auto p-4">
+          <div className="flex items-center justify-center">
+            <Image src={tpfLogo} alt="TPF Ingeniería" className="rounded m-10" />
+          </div>
+          <h1 className="text-3xl font-bold text-center mb-10 text-gray-700">Genera tu ticket de asistencia</h1>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/*<div>
+          {/*<Question className="w-12 h-12 mx-auto" />*/}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/*<div>
             <label className="block font-medium">Nombre y Apellido</label>
             <input
               type="text"
@@ -144,54 +149,54 @@ export default function Home() {
             />
             {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
           </div>*/}
-          <div>
-            <label className="block font-medium">Correo Electrónico</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="border p-2 w-full"
-              required
-            />
-            {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
-          </div>
-          <div>
-            <label className="block font-medium">Contrato/Oficina</label>
-            <select
-              name="contract"
-              value={formData.contract}
-              onChange={handleChange}
-              className="border p-2 w-full"
-              required
-            >
-              <option value="">Seleccione contrato</option>
-              <option value="Sis-L7">Sistemas L7</option>
-              <option value="L7t5y6">L7 tramo 5 y 6</option>
-              <option value="MT-OP">Metro Operacionales</option>
-              <option value="Talleres">Talleres y Cocheras L7</option>
-              <option value="EFE-NOS">EFE-NOS</option>
-              <option value="Victoria-Temuco">Victoria Temuco</option>
-              <option value="Administrativos">Administrativos</option>
-            </select>
-            {errors.contract && <p className="text-red-500 text-sm">{errors.contract}</p>}
-          </div>
-          <div>
-            <label className="block font-medium">Tipo</label>
-            <select
-              name="type"
-              value={formData.type}
-              onChange={handleChange}
-              className="border p-2 w-full"
-              required
-            >
-              <option value="">Seleccione un tipo</option>
-              <option value="incidencia">Incidencia</option>
-              <option value="solicitud">Solicitud</option>
-            </select>
-            {errors.type && <p className="text-red-500 text-sm">{errors.type}</p>}
-          </div>
-          {/*<div>
+            <div>
+              <label className="block font-medium">Correo Electrónico</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className="border p-2 w-full"
+                required
+              />
+              {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+            </div>
+            <div>
+              <label className="block font-medium">Contrato/Oficina</label>
+              <select
+                name="contract"
+                value={formData.contract}
+                onChange={handleChange}
+                className="border p-2 w-full"
+                required
+              >
+                <option value="">Seleccione contrato</option>
+                <option value="Sis-L7">Sistemas L7</option>
+                <option value="L7t5y6">L7 tramo 5 y 6</option>
+                <option value="MT-OP">Metro Operacionales</option>
+                <option value="Talleres">Talleres y Cocheras L7</option>
+                <option value="EFE-NOS">EFE-NOS</option>
+                <option value="Victoria-Temuco">Victoria Temuco</option>
+                <option value="Administrativos">Administrativos</option>
+              </select>
+              {errors.contract && <p className="text-red-500 text-sm">{errors.contract}</p>}
+            </div>
+            <div>
+              <label className="block font-medium">Tipo</label>
+              <select
+                name="type"
+                value={formData.type}
+                onChange={handleChange}
+                className="border p-2 w-full"
+                required
+              >
+                <option value="">Seleccione un tipo</option>
+                <option value="incidencia">Incidencia</option>
+                <option value="solicitud">Solicitud</option>
+              </select>
+              {errors.type && <p className="text-red-500 text-sm">{errors.type}</p>}
+            </div>
+            {/*<div>
             <label className="block font-medium">Prioridad</label>
             <select
               name="priority"
@@ -206,29 +211,29 @@ export default function Home() {
             </select>
             {errors.priority && <p className="text-red-500 text-sm">{errors.priority}</p>}
           </div>*/}
-          <div>
-            <label className="block font-medium">Descripción de la Incidencia</label>
-            <textarea
-              name="issue"
-              value={formData.issue}
-              onChange={handleChange}
-              className="border p-2 w-full"
-              rows={4}
-              required
-            />
-            {errors.issue && <p className="text-red-500 text-sm">{errors.issue}</p>}
-          </div>
-          
-
-          <button
-            type="submit"
-            className={`p-2 rounded ${loading ? "bg-gray-400 text-black" : "bg-blue-500 text-white"} w-full`}
-          >
-            {loading ? "Enviando..." : "Enviar"}
-          </button>
-        </form>
-        {message &&  <TicketToast />}
+            <div>
+              <label className="block font-medium">Descripción de la Incidencia</label>
+              <textarea
+                name="issue"
+                value={formData.issue}
+                onChange={handleChange}
+                className="border p-2 w-full"
+                rows={4}
+                required
+              />
+              {errors.issue && <p className="text-red-500 text-sm">{errors.issue}</p>}
+            </div>
+            <button
+              type="submit"
+              className={`p-2 rounded ${loading ? "bg-gray-400 text-black" : "bg-blue-500 text-white"} w-full`}
+            >
+              {loading ? "Enviando..." : "Enviar"}
+            </button>
+          </form>
+          {message && <TicketToast />}
+        </div>
       </div>
+    <Footer />
     </div>
   );
 }
