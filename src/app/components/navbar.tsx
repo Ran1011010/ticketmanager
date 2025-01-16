@@ -64,7 +64,7 @@ const Navbar: React.FC = () => {
             </div>
             <div className="hidden sm:ml-6 sm:block">
               <div className="flex space-x-4">
-                <Link href="#">
+                {/*<Link href="#">
                    Dashboard
                 </Link>
                 <Link href="#">
@@ -75,7 +75,7 @@ const Navbar: React.FC = () => {
                 </Link>
                 <Link href="#">
                   Calendar
-                </Link>
+                </Link>*/}
               </div>
             </div>
           </div>
