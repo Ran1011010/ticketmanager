@@ -42,7 +42,6 @@ async function sendEmail(
 }
 
  async function createTrelloCard(
-  name: string, 
   email: string, 
   issue: string, 
   contract: string,
@@ -64,9 +63,8 @@ async function sendEmail(
        key: TRELLO_API_KEY,
        token: TRELLO_API_TOKEN,
        idList: TRELLO_TICKET_LIST_ID,
-       name: `Ticket de ${name}`,
-       desc: `**Nombre:** ${name}
-              \n**Correo:** ${email}
+       name: `Ticket de ${email}`,
+       desc: `**Correo:** ${email}
               \n**Contrato:** ${contract}
               \n**Tipo:** ${type}
               \n**Prioridad:** ${priority}
@@ -84,7 +82,7 @@ async function sendEmail(
 
 export async function POST(req: Request) {
   try {
-    const { name, email, issue, contract, type, priority} = await req.json();
+    const { email, issue, contract, type, priority} = await req.json();
 
     if (!email || !issue || !contract || !type) {
       return NextResponse.json(
@@ -105,7 +103,7 @@ export async function POST(req: Request) {
     }
 
      try {
-       const card = await createTrelloCard(name, email, issue, contract, type, priority);
+       const card = await createTrelloCard(email, issue, contract, type, priority);
       // console.log("Tarjeta creada exitosamente:", card);
      } catch (trelloError) {
        console.error("Error al crear la tarjeta en Trello:", trelloError);
