@@ -125,12 +125,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-    <Navbar />
+      <Navbar />
       <div className="flex items-center justify-center bg-gray-100">
 
-        <div className="container max-w-2xl mx-auto p-4">
+        <div className="container max-w-2xl mx-auto p-4 mb-10">
           <div className="flex items-center justify-center">
-            <Image src={tpfLogo} alt="TPF Ingeniería" className="rounded m-10" />
+            <Image src={tpfLogo} alt="TPF Ingeniería" className="rounded m-20" />
           </div>
           <h1 className="text-3xl font-bold text-center mb-10 text-gray-700">Genera tu ticket de asistencia</h1>
 
@@ -233,7 +233,7 @@ export default function Home() {
           {message && <TicketToast />}
         </div>
       </div>
-    <Footer />
+      <Footer />
     </div>
   );
 }

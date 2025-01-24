@@ -1,6 +1,8 @@
 "use client";
+
 import Footer from '../components/footer';
 import Navbar from '../components/navbar';
+import Visor from '../components/visor';
 
 const ResourcesPage: React.FC = () => {
     return (
@@ -8,7 +10,7 @@ const ResourcesPage: React.FC = () => {
             <Navbar />
             <div className="container mx-auto px-4">
                 <h1 className="text-2xl font-bold my-4">Recursos</h1>
-                <p>Uso de plataforma NAS</p>
+                <Visor />
             </div>
             <Footer />
         </div>
