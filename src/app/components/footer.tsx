@@ -7,6 +7,7 @@ const Footer: React.FC = () => {
       <footer className="bg-gray-900 text-gray-400">
         <div className="max-w-7xl mx-auto px-4 py-6 flex justify-between items-center">
           <span className="text-sm">2025 TPF Ingeniería Chile.</span>
+          <span className="text-sm">Departamento de Informatica</span>
           <div className="flex space-x-4 ">
             <span className="text-sm">Creado por</span>
             <Link href="https://github.com/Ran1011010" aria-label="GitHub" className="hover:text-white">
