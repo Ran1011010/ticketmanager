@@ -127,10 +127,13 @@ const Navbar: React.FC = () => {
       {mobileMenuOpen && (
         <div className="sm:hidden" id="mobile-menu">
           <div className="space-y-1 px-2 pb-3 pt-2">
-            <Link href="#">Dashboard</Link>
-            <Link href="#">Team</Link>
-            <Link href="#"></Link>
-            <Link href="#">Calendar</Link>
+            <Link href="/" className="text-white hover:text-gray-300">
+              Tickets
+            </Link>
+            <hr style={{ width: '20%' }} />
+            <Link href="/resources" className="text-white hover:text-gray-300">
+              Recursos TPF
+            </Link>
           </div>
         </div>
       )}

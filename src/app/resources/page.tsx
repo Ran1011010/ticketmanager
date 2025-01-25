@@ -9,7 +9,9 @@ const ResourcesPage: React.FC = () => {
         <div className="min-h-screen">
             <Navbar />
             <div className="container mx-auto px-4">
-                <h1 className="text-2xl font-bold my-4">Recursos</h1>
+                <hr className="mt-6" />
+                <h1 className="text-3xl font-bold my-4 text-center" >Educación Nube TPF</h1>
+                <hr className="my-6" />
                 <Visor />
             </div>
             <Footer />
