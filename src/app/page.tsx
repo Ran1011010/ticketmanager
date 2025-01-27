@@ -171,13 +171,13 @@ export default function Home() {
                 required
               >
                 <option value="">Seleccione contrato</option>
-                <option value="Sis-L7">Sistemas L7</option>
+                <option value="ITO-L7">Sistemas L7</option>
                 <option value="L7t5y6">L7 tramo 5 y 6</option>
                 <option value="MT-OP">Metro Operacionales</option>
-                <option value="Talleres">Talleres y Cocheras L7</option>
+                <option value="MT-OP">Talleres y Cocheras L7</option>
                 <option value="EFE-NOS">EFE-NOS</option>
-                <option value="Victoria-Temuco">Victoria Temuco</option>
-                <option value="Administrativos">Administrativos</option>
+                <option value="VT">Victoria Temuco</option>
+                <option value="administrativos">Administrativos</option>
               </select>
               {errors.contract && <p className="text-red-500 text-sm">{errors.contract}</p>}
             </div>
