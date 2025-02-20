@@ -46,7 +46,10 @@ export default function Home() {
     if (!formData.email.trim()) {
       newErrors.email = "El correo electrónico es obligatorio.";
       isValid = false;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) 
+      || formData.email === 'javiera.paez@tpfingenieria.cl' 
+      || formData.email === 'jaime.garcia@tpfingenieria.cl'
+      || formData.email === 'soporte@tpfingenieria.cl') {
       newErrors.email = "El correo electrónico no es válido.";
       isValid = false;
     } else if (!/^[^\s@]+@(tpfingenieria\.cl|tpfingenieria\.com)$/.test(formData.email)) {
