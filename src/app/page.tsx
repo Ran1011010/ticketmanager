@@ -57,7 +57,7 @@ export default function Home() {
       isValid = false;
     }
 
-    if (formData.contract && !["ITO-L7", "L7t5y6", "MT-OP", "TyC", "EFE-NOS", "VT", "administrativos"].includes(formData.contract)) {
+    if (formData.contract && !["ITO-L7", "L7t5y6", "MT-OP", "TyC", "EFE-NOS", "VT", "administrativos","EFE-BAR","EFE-RD","MT-L9"].includes(formData.contract)) {
       newErrors.contract = "El contrato seleccionado no es válido.";
       isValid = false;
     }
@@ -174,11 +174,14 @@ export default function Home() {
                 required
               >
                 <option value="">Seleccione contrato</option>
-                <option value="ITO-L7">Sistemas L7</option>
+                <option value="ITO-L7">Sistemas L7 y Extensión L6</option>
                 <option value="L7t5y6">L7 tramo 5 y 6</option>
                 <option value="MT-OP">Metro Operacionales</option>
                 <option value="TyC">Talleres y Cocheras L7</option>
                 <option value="EFE-NOS">EFE-NOS</option>
+                <option value="EFE-BAR">EFE-Barrancas</option>
+                <option value="EFE-RD">EFE-Radio Comunicaciones</option>
+                <option value="MT-L9">Metro L9</option>
                 <option value="VT">Victoria Temuco</option>
                 <option value="administrativos">Administrativos</option>
               </select>
