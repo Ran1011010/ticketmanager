@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import { v2 as cloudinary } from "cloudinary";
 
-async function sendEmail(
-// name: string, 
-   email: string,
-   issue: string, 
-   contract: string, 
-   type: string,
- // priority: string
-) {
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+  api_key: process.env.CLOUDINARY_API_KEY!,
+  api_secret: process.env.CLOUDINARY_API_SECRET!,
+});
+
+async function sendEmail(email: string, issue: string, contract: string, type: string, imageUrl?: string) {
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT),
@@ -26,7 +26,9 @@ async function sendEmail(
     text: `\nCorreo: ${email}
            \nContrato: ${contract}
            \nTipo: ${type}
-           \nDescripcion: ${issue}`,
+           \nDescripcion: ${issue}
+           \nImagen: ${imageUrl ? imageUrl : "No se adjuntó imagen"}`,
+
   });
 
   await transporter.sendMail({
@@ -41,48 +43,78 @@ async function sendEmail(
   transporter.close();
 }
 
- async function createTrelloCard(
-  email: string, 
-  issue: string, 
+async function createTrelloCard(
+  email: string,
+  issue: string,
   contract: string,
   type: string,
-  priority: string
+  priority: string,
+  imageUrl?: string
 ) {
-  const { TRELLO_API_KEY, TRELLO_API_TOKEN, TRELLO_BOARD_ID, TRELLO_TICKET_LIST_ID } = process.env;
+  const { TRELLO_API_KEY, TRELLO_API_TOKEN, TRELLO_TICKET_LIST_ID } = process.env;
 
-   if (!TRELLO_API_KEY || !TRELLO_API_TOKEN || !TRELLO_BOARD_ID || !TRELLO_TICKET_LIST_ID) {
-     throw new Error("Configuración de Trello faltante en las variables de entorno.");
-   }
+  if (!TRELLO_API_KEY || !TRELLO_API_TOKEN || !TRELLO_TICKET_LIST_ID) {
+    throw new Error("Configuración de Trello faltante en las variables de entorno.");
+  }
 
-   const response = await fetch(`https://api.trello.com/1/cards`, {
-     method: "POST",
-     headers: {
-       "Content-Type": "application/json",
-     },
-     body: JSON.stringify({
-       key: TRELLO_API_KEY,
-       token: TRELLO_API_TOKEN,
-       idList: TRELLO_TICKET_LIST_ID,
-       name: `Ticket de ${email}`,
-       desc: `**Correo:** ${email}
-              \n**Contrato:** ${contract}
-              \n**Tipo:** ${type}
-              \n**Prioridad:** ${priority}
-              \n**Descripcion:** ${issue}`,  
-     }),
-   });
+  // 1) Crear tarjeta
+  const response = await fetch(`https://api.trello.com/1/cards`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      key: TRELLO_API_KEY,
+      token: TRELLO_API_TOKEN,
+      idList: TRELLO_TICKET_LIST_ID,
+      name: `Ticket de ${email}`,
+      desc: `**Correo:** ${email}
+             \n**Contrato:** ${contract}
+             \n**Tipo:** ${type}
+             \n**Prioridad:** ${priority}
+             \n**Descripcion:** ${issue}
+             ${imageUrl ? `\n\n📎 Imagen adjunta: ${imageUrl}` : ""}`,
+    }),
+  });
 
-   if (!response.ok) {
-     const error = await response.json();
-     throw new Error(`Error al crear la tarjeta en Trello: ${error.message}`);
-   }
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(`Error al crear la tarjeta en Trello: ${error.message}`);
+  }
 
-   return response.json();
- }
+  const card = await response.json();
+
+  // 2) Adjuntar imagen en la tarjeta (si existe)
+  if (imageUrl && card.id) {
+    await fetch(
+      `https://api.trello.com/1/cards/${card.id}/attachments?key=${TRELLO_API_KEY}&token=${TRELLO_API_TOKEN}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: imageUrl,
+          name: "Evidencia de la incidencia",
+        }),
+      }
+    );
+  }
+
+  return card;
+}
 
 export async function POST(req: Request) {
+
+  let imageUrl: string | undefined;
   try {
-    const { email, issue, contract, type, priority} = await req.json();
+    // Usamos FormData en lugar de req.json()
+    const formData = await req.formData();
+
+    const email = formData.get("email") as string;
+    const issue = formData.get("issue") as string;
+    const contract = formData.get("contract") as string;
+    const type = formData.get("type") as string;
+    const priority = (formData.get("priority") as string) || "Normal";
+    const file = formData.get("image") as File | null;
 
     if (!email || !issue || !contract || !type) {
       return NextResponse.json(
@@ -91,27 +123,28 @@ export async function POST(req: Request) {
       );
     }
 
-    try {
-      await sendEmail(email, issue, contract, type);
-     // console.log("Correo enviado exitosamente.");
-    } catch (emailError) {
-      console.error("Error al enviar el correo:", emailError);
-      return NextResponse.json(
-        { message: "Error al enviar el correo." },
-        { status: 500 }
-      );
+    // Subir la imagen a Cloudinary si existe
+    if (file) {
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      const upload = await new Promise<any>((resolve, reject) => {
+        cloudinary.uploader
+          .upload_stream({ folder: "tickets" }, (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          })
+          .end(buffer);
+      });
+
+      imageUrl = upload.secure_url;
     }
 
-     try {
-       const card = await createTrelloCard(email, issue, contract, type, priority);
-      // console.log("Tarjeta creada exitosamente:", card);
-     } catch (trelloError) {
-       console.error("Error al crear la tarjeta en Trello:", trelloError);
-       return NextResponse.json(
-         { message: "Error al crear la tarjeta en Trello." },
-         { status: 500 }
-       );
-     }
+    // 1) Enviar email
+    await sendEmail(email, issue, contract, type, imageUrl);
+
+    // 2) Crear tarjeta en Trello
+    await createTrelloCard(email, issue, contract, type, priority, imageUrl);
 
     return NextResponse.json({
       message: "Incidencia enviada y tarjeta creada con éxito.",

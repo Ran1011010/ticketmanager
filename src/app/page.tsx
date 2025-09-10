@@ -30,6 +30,7 @@ export default function Home() {
   const [errors, setErrors] = useState(initializeErrors());
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [file, setFile] = useState<File | null>(null);
 
   const validateFields = () => {
     const newErrors = initializeErrors();
@@ -91,6 +92,13 @@ export default function Home() {
     setErrors({ ...errors, [e.target.name]: "" });
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+    }
+  };
+  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage("");
@@ -101,7 +109,7 @@ export default function Home() {
 
     setLoading(true);
 
-    try {
+   {/*try {
       const response = await fetch("/api/submit-ticket", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -123,8 +131,38 @@ export default function Home() {
       setMessage("Error de conexión. Intenta nuevamente.");
     } finally {
       setLoading(false);
+    }*/}
+    try {
+      const formDataToSend = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        formDataToSend.append(key, value);
+      });
+  
+      if (file) {
+        formDataToSend.append("image", file);
+      }
+  
+      const response = await fetch("/api/submit-ticket", {
+        method: "POST",
+        body: formDataToSend,
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        setMessage("Ticket enviado con éxito.");
+        setFormData(initializeFormData());
+        setFile(null); 
+        setTimeout(() => setMessage(""), 5000);
+      } else {
+        const error = await response.json();
+        setMessage(error.message || "Hubo un error al enviar el ticket.");
+      }
+    } catch (error) {
+      setMessage("Error de conexión. Intenta nuevamente.");
+    } finally {
+      setLoading(false);
     }
-  };
+  }; 
 
   return (
     <div className="min-h-screen">
@@ -227,6 +265,17 @@ export default function Home() {
                 rows={4}
                 required
               />
+              <input type="file" name="image" accept="image/*" onChange={handleFileChange} />
+              {file && (
+              <div className="mt-2">
+                <p className="text-sm text-gray-500">Imagen seleccionada:</p>
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt="Preview"
+                  className="mt-1 max-h-40 rounded border"
+                />
+              </div>
+            )}
               {errors.issue && <p className="text-red-500 text-sm">{errors.issue}</p>}
             </div>
             <button
