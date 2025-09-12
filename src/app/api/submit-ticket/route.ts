@@ -8,7 +8,15 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET!,
 });
 
-async function sendEmail(email: string, issue: string, contract: string, type: string, imageUrl?: string) {
+async function sendEmail(
+  email: string,
+  issue: string, 
+  contract: string, 
+  type: string, 
+  day: string, 
+  hour: string,  
+  imageUrl?: string
+){
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT),
@@ -27,6 +35,8 @@ async function sendEmail(email: string, issue: string, contract: string, type: s
            \nContrato: ${contract}
            \nTipo: ${type}
            \nDescripcion: ${issue}
+           \nDía: ${day}
+           \nHora: ${hour}
            \nImagen: ${imageUrl ? imageUrl : "No se adjuntó imagen"}`,
 
   });
@@ -49,6 +59,8 @@ async function createTrelloCard(
   contract: string,
   type: string,
   priority: string,
+  day: string,
+  hour: string,
   imageUrl?: string
 ) {
   const { TRELLO_API_KEY, TRELLO_API_TOKEN, TRELLO_TICKET_LIST_ID } = process.env;
@@ -73,6 +85,8 @@ async function createTrelloCard(
              \n**Tipo:** ${type}
              \n**Prioridad:** ${priority}
              \n**Descripcion:** ${issue}
+             \n**Día:** ${day}
+             \n**Hora:** ${hour}
              ${imageUrl ? `\n\n📎 Imagen adjunta: ${imageUrl}` : ""}`,
     }),
   });
@@ -115,6 +129,8 @@ export async function POST(req: Request) {
     const type = formData.get("type") as string;
     const priority = (formData.get("priority") as string) || "Normal";
     const file = formData.get("image") as File | null;
+    const day = new Date().toISOString().split('T')[0];
+    const hour = new Date().toTimeString().split('T')[1];
 
     if (!email || !issue || !contract || !type) {
       return NextResponse.json(
@@ -141,10 +157,10 @@ export async function POST(req: Request) {
     }
 
     // 1) Enviar email
-    await sendEmail(email, issue, contract, type, imageUrl);
+    await sendEmail(email, issue, contract, type, day, hour, imageUrl);
 
     // 2) Crear tarjeta en Trello
-    await createTrelloCard(email, issue, contract, type, priority, imageUrl);
+    await createTrelloCard(email, issue, contract, type, priority, day, hour, imageUrl);
 
     return NextResponse.json({
       message: "Incidencia enviada y tarjeta creada con éxito.",
