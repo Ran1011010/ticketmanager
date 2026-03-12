@@ -214,13 +214,15 @@ export default function Home() {
                 <option value="">Seleccione contrato</option>
                 <option value="ITO-L7">Sistemas L7 y Extensión L6</option>
                 <option value="L7t5y6">L7 tramo 5 y 6</option>
-                <option value="MT-OP">Metro Operacionales</option>
-                <option value="TyC">Talleres y Cocheras L7</option>
-                <option value="EFE-NOS">EFE-NOS</option>
+              { /*<option value="MT-OP">Metro Operacionales</option> */}
+                <option value="TyC">Talleres y Cocheras Metro L7</option>
+               { /* <option value="EFE-NOS">EFE-NOS</option>*/}
                 <option value="EFE-BAR">EFE-Barrancas</option>
                 <option value="EFE-RD">EFE-Radio Comunicaciones</option>
-                <option value="MT-L9">Metro L9</option>
+                <option value="MT-L9">Obras Previas Metro L9</option>
                 <option value="VT">Victoria Temuco</option>
+                <option value="EFE-PAN-2">EFE PAN 2</option>
+                <option value="TyC-L9">Talleres y Cocheras Metro L9</option>
                 <option value="administrativos">Administrativos</option>
               </select>
               {errors.contract && <p className="text-red-500 text-sm">{errors.contract}</p>}
