@@ -10,13 +10,13 @@ cloudinary.config({
 
 async function sendEmail(
   email: string,
-  issue: string, 
-  contract: string, 
-  type: string, 
-  day: string, 
-  hour: string,  
+  issue: string,
+  contract: string,
+  type: string,
+  day: string,
+  hour: string,
   imageUrl?: string
-){
+) {
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT),
@@ -116,6 +116,105 @@ async function createTrelloCard(
   return card;
 }
 
+async function createTicketGLPI(
+  email: string,
+  issue: string,
+  contract: string,
+  type: string,
+  priority: string,
+  day: string,
+  hour: string,
+  imageUrl?: string
+) {
+  const { GLPI_APP_TOKEN, GLPI_USER_TOKEN, GLPI_URL } = process.env;
+
+  if (!GLPI_APP_TOKEN || !GLPI_USER_TOKEN) { throw new Error("Configuracion faltante con variables GLPI de entorno") }
+
+  //  Crear sesion en GLPI
+  const sessionRes = await fetch(`${GLPI_URL}/apirest.php/initSession`, {
+    method: "GET",
+    headers: {
+      "App-Token": GLPI_APP_TOKEN,
+      "Authorization": `user_token ${GLPI_USER_TOKEN}`,
+    },
+  });
+
+  const sessionData = await sessionRes.json();
+
+  console.log('session data ', sessionData)
+
+  if (!sessionData.session_token) {
+    throw new Error("No se pudo obtener session_token");
+  }
+
+  const sessionToken = sessionData.session_token;
+  const content = `
+        Correo: ${email}
+        Contrato: ${contract}
+        Tipo: ${type}
+        Priodidad: ${priority}
+        Descripcion: ${issue}
+        Dia: ${day}
+        Hora: ${hour}
+        ${imageUrl ? `Imagen: ${imageUrl}` : ""}
+        `;
+
+  const userRes = await fetch(
+    `${GLPI_URL}/apirest.php/User?searchText=${email}&session_token=${sessionToken}`,
+    {
+      headers: {
+        "App-Token": GLPI_APP_TOKEN,
+      },
+    }
+  );
+
+  const users = await userRes.json()
+  const userId = users[0]?.id
+
+  // body GLPI!!!
+  const body = {
+    input: {
+      name: `Incidencia de ${email}`,
+      content,
+      requesttypes_id: 1,
+      urgency: Number(priority) || 3,
+      _users_id_requester: {
+        email: userId,
+      }
+    }
+  }
+
+  const res = await fetch(`${GLPI_URL}/apirest.php/Ticket?session_token=${sessionToken}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "App-Token": GLPI_APP_TOKEN,
+      Authorization: `user_token ${GLPI_USER_TOKEN}`,
+    },
+    body: JSON.stringify(body)
+  })
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Error creando ticket en GLPI: ${errorText}`);
+  }
+
+  const data = await res.json()
+  console.log("glpi response: ", data)
+
+  // Cerrar sesion glpi
+
+  await fetch(`${GLPI_URL}/apirest.php/killSession`, {
+    method: "GET",
+    headers: {
+      "App-Token": GLPI_APP_TOKEN,
+      "Session-Token": sessionToken,
+    },
+  });
+
+  return data;
+}
+
 export async function POST(req: Request) {
 
   let imageUrl: string | undefined;
@@ -127,7 +226,7 @@ export async function POST(req: Request) {
     const issue = formData.get("issue") as string;
     const contract = formData.get("contract") as string;
     const type = formData.get("type") as string;
-    const priority = (formData.get("priority") as string) || "Normal";
+    const priority = (formData.get("priority") as string) || "3";
     const file = formData.get("image") as File | null;
     const day = new Date().toISOString().split('T')[0];
     const hour = new Date().toTimeString().split('T')[1];
@@ -138,6 +237,10 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    // verificar si existe usuario en GLPI
+    // con el correo y se crea ticket en glpi
+
 
     // Subir la imagen a Cloudinary si existe
     if (file) {
@@ -160,7 +263,29 @@ export async function POST(req: Request) {
     await sendEmail(email, issue, contract, type, day, hour, imageUrl);
 
     // 2) Crear tarjeta en Trello
-    await createTrelloCard(email, issue, contract, type, priority, day, hour, imageUrl);
+    await createTrelloCard(
+      email,
+      issue,
+      contract,
+      type,
+      priority,
+      day,
+      hour,
+      imageUrl
+    );
+
+    // 3) Crear Tickets GLPI
+    await createTicketGLPI(
+      email,
+      issue,
+      contract,
+      type,
+      priority,
+      day,
+      hour,
+      imageUrl
+    )
+
 
     return NextResponse.json({
       message: "Incidencia enviada y tarjeta creada con éxito.",

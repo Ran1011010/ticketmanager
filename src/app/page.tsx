@@ -14,7 +14,7 @@ export default function Home() {
     contract: "",
     type: "",
     issue: "",
-    // priority: "",
+    priority: "",
   });
 
   const initializeFormData = () => ({
@@ -23,7 +23,7 @@ export default function Home() {
     contract: "",
     type: "",
     issue: "",
-    // priority: "",
+    priority: "",
   });
 
   const [formData, setFormData] = useState(initializeFormData());
@@ -48,8 +48,6 @@ export default function Home() {
       newErrors.email = "El correo electrónico es obligatorio.";
       isValid = false;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) 
-      || formData.email === 'javiera.paez@tpfingenieria.cl' 
-      || formData.email === 'jaime.garcia@tpfingenieria.cl'
       || formData.email === 'soporte@tpfingenieria.cl') {
       newErrors.email = "El correo electrónico no es válido.";
       isValid = false;
@@ -58,7 +56,7 @@ export default function Home() {
       isValid = false;
     }
 
-    if (formData.contract && !["ITO-L7", "L7t5y6", "MT-OP", "TyC", "EFE-NOS", "VT", "administrativos","EFE-BAR","EFE-RD","MT-L9"].includes(formData.contract)) {
+    if (formData.contract && !["ITO-L7", "L7t5y6", "TyC", "EFE-NOS", "VT", "administrativos","EFE-BAR","EFE-RD","MT-L9", "TyC-L9","EFE-PAN-2"].includes(formData.contract)) {
       newErrors.contract = "El contrato seleccionado no es válido.";
       isValid = false;
     }
@@ -242,21 +240,21 @@ export default function Home() {
               </select>
               {errors.type && <p className="text-red-500 text-sm">{errors.type}</p>}
             </div>
-            {/*<div>
-            <label className="block font-medium">Prioridad</label>
+            <div>
+            <label className="block font-medium">Nivel de Urgencia</label>
             <select
               name="priority"
               value={formData.priority}
               onChange={handleChange}
               className="border p-2 w-full"
             >
-              <option value="">Seleccione prioridad</option>
-              <option value="baja">Baja</option>
-              <option value="media">Media</option>
-              <option value="alta">Alta</option>
+              <option value="">Seleccione urgencia</option>
+              <option value="2">Baja</option>
+              <option value="3">Media</option>
+              <option value="5">Alta</option>
             </select>
             {errors.priority && <p className="text-red-500 text-sm">{errors.priority}</p>}
-          </div>*/}
+          </div>
             <div>
               <label className="block font-medium">Descripción de la Incidencia</label>
               <textarea
