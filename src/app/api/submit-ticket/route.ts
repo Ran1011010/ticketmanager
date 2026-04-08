@@ -141,7 +141,7 @@ async function createTicketGLPI(
 
   const sessionData = await sessionRes.json();
 
-  console.log('session data ', sessionData)
+  // console.log('session data ', sessionData)
 
   if (!sessionData.session_token) {
     throw new Error("No se pudo obtener session_token");
@@ -159,18 +159,6 @@ async function createTicketGLPI(
         ${imageUrl ? `Imagen: ${imageUrl}` : ""}
         `;
 
-  const userRes = await fetch(
-    `${GLPI_URL}/apirest.php/User?searchText=${email}&session_token=${sessionToken}`,
-    {
-      headers: {
-        "App-Token": GLPI_APP_TOKEN,
-      },
-    }
-  );
-
-  const users = await userRes.json()
-  const userId = users[0]?.id
-
   // body GLPI!!!
   const body = {
     input: {
@@ -179,7 +167,7 @@ async function createTicketGLPI(
       requesttypes_id: 1,
       urgency: Number(priority) || 3,
       _users_id_requester: {
-        email: userId,
+        email: email,
       }
     }
   }
@@ -200,17 +188,17 @@ async function createTicketGLPI(
   }
 
   const data = await res.json()
-  console.log("glpi response: ", data)
+  // console.log("glpi response: ", data)
 
   // Cerrar sesion glpi
 
-  await fetch(`${GLPI_URL}/apirest.php/killSession`, {
-    method: "GET",
-    headers: {
-      "App-Token": GLPI_APP_TOKEN,
-      "Session-Token": sessionToken,
-    },
-  });
+  // await fetch(`${GLPI_URL}/apirest.php/killSession`, {
+  //   method: "GET",
+  //   headers: {
+  //     "App-Token": GLPI_APP_TOKEN,
+  //     "Session-Token": sessionToken,
+  //   },
+  // });
 
   return data;
 }
