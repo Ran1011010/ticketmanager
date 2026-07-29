@@ -56,7 +56,21 @@ export default function Home() {
       isValid = false;
     }
 
-    if (formData.contract && !["ITO-L7", "L7t5y6", "TyC", "EFE-NOS", "VT", "administrativos","EFE-BAR","EFE-RD","MT-L9", "TyC-L9","EFE-PAN-2"].includes(formData.contract)) {
+    if (formData.contract && ![
+          "ITO-L7", 
+          "L7t5y6", 
+          "TyC-L7", 
+          "EFE-NOS", 
+          "VT", 
+          "administrativos",
+          "EFE-BAR",
+          "EFE-RD",
+          "MT-L9", 
+          "TyC-L9",
+          "EFE-PAN-2",
+          "EFE-MeliBatuco",
+          "PyT-L9"
+        ].includes(formData.contract)) {
       newErrors.contract = "El contrato seleccionado no es válido.";
       isValid = false;
     }
@@ -213,14 +227,16 @@ export default function Home() {
                 <option value="ITO-L7">Sistemas L7 y Extensión L6</option>
                 <option value="L7t5y6">L7 tramo 5 y 6</option>
               { /*<option value="MT-OP">Metro Operacionales</option> */}
-                <option value="TyC">Talleres y Cocheras Metro L7</option>
+                <option value="TyC-L7">Talleres y Cocheras Metro L7</option>
+                <option value="TyC-L9">Talleres y Cocheras Metro L9</option>
+                <option value="MT-L9">Obras Previas Metro L9</option>
+                <option value="PyT-L9">Pique y túneles Tramo 1AB L9</option>
                { /* <option value="EFE-NOS">EFE-NOS</option>*/}
                 <option value="EFE-BAR">EFE-Barrancas</option>
                 <option value="EFE-RD">EFE-Radio Comunicaciones</option>
-                <option value="MT-L9">Obras Previas Metro L9</option>
-                <option value="VT">Victoria Temuco</option>
                 <option value="EFE-PAN-2">EFE PAN 2</option>
-                <option value="TyC-L9">Talleres y Cocheras Metro L9</option>
+                <option value="EFE-MeliBatuco">EFE Melipilla Batuco</option>
+                <option value="VT">Victoria Temuco</option>                                
                 <option value="administrativos">Administrativos</option>
               </select>
               {errors.contract && <p className="text-red-500 text-sm">{errors.contract}</p>}
@@ -241,7 +257,7 @@ export default function Home() {
               {errors.type && <p className="text-red-500 text-sm">{errors.type}</p>}
             </div>
             <div>
-            <label className="block font-medium">Nivel de Urgencia</label>
+            {/*<label className="block font-medium">Nivel de Urgencia</label>
             <select
               name="priority"
               value={formData.priority}
@@ -253,7 +269,7 @@ export default function Home() {
               <option value="3">Media</option>
               <option value="5">Alta</option>
             </select>
-            {errors.priority && <p className="text-red-500 text-sm">{errors.priority}</p>}
+            {errors.priority && <p className="text-red-500 text-sm">{errors.priority}</p>}*/}
           </div>
             <div>
               <label className="block font-medium">Descripción de la Incidencia</label>

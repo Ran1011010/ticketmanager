@@ -27,7 +27,7 @@ async function sendEmail(
     },
   });
 
-  await transporter.sendMail({
+  const sendTicketEmail = await transporter.sendMail({
     from: process.env.SMTP_USER,
     to: process.env.SMTP_USER_TO,
     subject: `Nueva incidencia de ${email}`,
@@ -40,6 +40,8 @@ async function sendEmail(
            \nImagen: ${imageUrl ? imageUrl : "No se adjuntó imagen"}`,
 
   });
+
+  console.log ("sendTicketEmail", sendTicketEmail)
 
   await transporter.sendMail({
     from: process.env.SMTP_USER,
