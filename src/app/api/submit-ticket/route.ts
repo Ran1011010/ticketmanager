@@ -41,8 +41,6 @@ async function sendEmail(
 
   });
 
-  console.log ("sendTicketEmail", sendTicketEmail)
-
   await transporter.sendMail({
     from: process.env.SMTP_USER,
     to: email,
@@ -265,7 +263,7 @@ export async function POST(req: Request) {
     );
 
     // 3) Crear Tickets GLPI
-    await createTicketGLPI(
+    const responseglpi = await createTicketGLPI(
       email,
       issue,
       contract,
@@ -276,7 +274,7 @@ export async function POST(req: Request) {
       imageUrl
     )
 
-
+    console.log("responseglpi ",responseglpi)
     return NextResponse.json({
       message: "Incidencia enviada y tarjeta creada con éxito.",
     });
