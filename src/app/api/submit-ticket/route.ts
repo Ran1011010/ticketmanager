@@ -147,7 +147,7 @@ async function sendEmail(
   const sendTicketEmail = await transporter.sendMail({
     from: process.env.SMTP_USER,
     to: process.env.SMTP_USER_TO,
-    subject: `Nueva incidencia de ${email}`,
+    subject: `Nueva incidencia ${ticketCode} de ${email}`,
     text: `\nCorreo: ${email}
            \nContrato: ${contract}
            \nTipo: ${type}
@@ -171,6 +171,7 @@ async function sendEmail(
 }
 
 async function createTrelloCard(
+  ticketCode: string,
   email: string,
   issue: string,
   contract: string,
@@ -196,8 +197,9 @@ async function createTrelloCard(
       key: TRELLO_API_KEY,
       token: TRELLO_API_TOKEN,
       idList: TRELLO_TICKET_LIST_ID,
-      name: `Ticket de ${email}`,
+      name: `Ticket ${ticketCode} de ${email}`,
       desc: `**Correo:** ${email}
+             \n**Nuevo Ticket:** ${ticketCode}
              \n**Contrato:** ${contract}
              \n**Tipo:** ${type}
              \n**Prioridad:** ${priority}
@@ -318,8 +320,9 @@ export async function POST(req: Request) {
     const type = formData.get("type") as string;
     const priority = (formData.get("priority") as string) || "3";
     const file = formData.get("image") as File | null;
-    const day = new Date().toISOString().split('T')[0];
-    const hour = new Date().toTimeString().split('T')[1];
+    const now = new Date();
+    const day = now.toLocaleDateString('en-CA', { timeZone: 'America/Santiago' });
+    const hour = now.toLocaleTimeString('es-CL', { timeZone: 'America/Santiago', hour12: false });
 
     if (!email || !issue || !contract || !type) {
       return NextResponse.json(
@@ -358,6 +361,7 @@ export async function POST(req: Request) {
 
     // 3) Crear tarjeta en Trello
     await createTrelloCard(
+      ticketCode,
       email,
       issue,
       contract,
