@@ -8,6 +8,122 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET!,
 });
 
+// Numeración de tickets: mismo esquema TCK-#### usado en la migración
+// histórica desde Trello (scripts/number-historical-tickets.mjs), continuada
+// desde TCK-1446. El próximo número se calcula consultando GLPI (fuente de
+// verdad) por el código más alto ya usado en la descripción de los tickets.
+const TICKET_CODE_PREFIX = "TCK";
+const TICKET_CODE_PAD = 4;
+
+// Se resuelve una sola vez por proceso: el id de campo de "content" en GLPI
+// no cambia en runtime.
+let glpiContentFieldId: number | null = null;
+
+async function initGlpiSession(): Promise<string> {
+  const { GLPI_APP_TOKEN, GLPI_USER_TOKEN, GLPI_URL } = process.env;
+
+  if (!GLPI_APP_TOKEN || !GLPI_USER_TOKEN) {
+    throw new Error("Configuracion faltante con variables GLPI de entorno");
+  }
+
+  const sessionRes = await fetch(`${GLPI_URL}/apirest.php/initSession`, {
+    method: "GET",
+    headers: {
+      "App-Token": GLPI_APP_TOKEN,
+      Authorization: `user_token ${GLPI_USER_TOKEN}`,
+    },
+  });
+
+  const sessionData = await sessionRes.json();
+
+  if (!sessionData.session_token) {
+    throw new Error("No se pudo obtener session_token");
+  }
+
+  return sessionData.session_token;
+}
+
+async function getGlpiContentFieldId(sessionToken: string): Promise<number> {
+  if (glpiContentFieldId !== null) return glpiContentFieldId;
+
+  const { GLPI_APP_TOKEN, GLPI_USER_TOKEN, GLPI_URL } = process.env;
+
+  const res = await fetch(
+    `${GLPI_URL}/apirest.php/listSearchOptions/Ticket?session_token=${sessionToken}`,
+    {
+      headers: {
+        "App-Token": GLPI_APP_TOKEN!,
+        Authorization: `user_token ${GLPI_USER_TOKEN}`,
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error(`No se pudieron obtener las opciones de búsqueda de GLPI: ${await res.text()}`);
+  }
+
+  const options: Record<string, { field?: string; table?: string }> = await res.json();
+
+  const entry =
+    Object.entries(options).find(
+      ([, value]) => value?.field === "content" && value?.table === "glpi_tickets"
+    ) ?? Object.entries(options).find(([, value]) => value?.field === "content");
+
+  if (!entry) {
+    throw new Error("No se encontró el campo 'content' en las opciones de búsqueda de GLPI.");
+  }
+
+  glpiContentFieldId = Number(entry[0]);
+  return glpiContentFieldId;
+}
+
+async function getNextTicketCode(sessionToken: string): Promise<string> {
+  const { GLPI_APP_TOKEN, GLPI_USER_TOKEN, GLPI_URL } = process.env;
+  const contentFieldId = await getGlpiContentFieldId(sessionToken);
+  const codeRegex = new RegExp(`${TICKET_CODE_PREFIX}-(\\d+)`, "g");
+
+  let maxNumber = 0;
+  let start = 0;
+  const pageSize = 1000;
+
+  while (true) {
+    const url = new URL(`${GLPI_URL}/apirest.php/search/Ticket`);
+    url.searchParams.set("session_token", sessionToken);
+    url.searchParams.set("criteria[0][field]", String(contentFieldId));
+    url.searchParams.set("criteria[0][searchtype]", "contains");
+    url.searchParams.set("criteria[0][value]", `${TICKET_CODE_PREFIX}-`);
+    url.searchParams.set("forcedisplay[0]", String(contentFieldId));
+    url.searchParams.set("range", `${start}-${start + pageSize - 1}`);
+
+    const res = await fetch(url.toString(), {
+      headers: {
+        "App-Token": GLPI_APP_TOKEN!,
+        Authorization: `user_token ${GLPI_USER_TOKEN}`,
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error(`Error consultando el último código de ticket en GLPI: ${await res.text()}`);
+    }
+
+    const result = await res.json();
+    const rows: Record<string, unknown>[] = result.data ?? [];
+
+    for (const row of rows) {
+      const content = String(row[contentFieldId] ?? "");
+      for (const match of content.matchAll(codeRegex)) {
+        maxNumber = Math.max(maxNumber, Number(match[1]));
+      }
+    }
+
+    const totalCount = Number(result.totalcount ?? rows.length);
+    start += pageSize;
+    if (rows.length === 0 || start >= totalCount) break;
+  }
+
+  return `${TICKET_CODE_PREFIX}-${String(maxNumber + 1).padStart(TICKET_CODE_PAD, "0")}`;
+}
+
 async function sendEmail(
   email: string,
   issue: string,
@@ -117,6 +233,8 @@ async function createTrelloCard(
 }
 
 async function createTicketGLPI(
+  sessionToken: string,
+  ticketCode: string,
   email: string,
   issue: string,
   contract: string,
@@ -130,25 +248,8 @@ async function createTicketGLPI(
 
   if (!GLPI_APP_TOKEN || !GLPI_USER_TOKEN) { throw new Error("Configuracion faltante con variables GLPI de entorno") }
 
-  //  Crear sesion en GLPI
-  const sessionRes = await fetch(`${GLPI_URL}/apirest.php/initSession`, {
-    method: "GET",
-    headers: {
-      "App-Token": GLPI_APP_TOKEN,
-      "Authorization": `user_token ${GLPI_USER_TOKEN}`,
-    },
-  });
-
-  const sessionData = await sessionRes.json();
-
-  // console.log('session data ', sessionData)
-
-  if (!sessionData.session_token) {
-    throw new Error("No se pudo obtener session_token");
-  }
-
-  const sessionToken = sessionData.session_token;
   const content = `
+        Código: ${ticketCode}
         Correo: ${email}
         Contrato: ${contract}
         Tipo: ${type}
@@ -162,7 +263,7 @@ async function createTicketGLPI(
   // body GLPI!!!
   const body = {
     input: {
-      name: `Incidencia de ${email}`,
+      name: `[${ticketCode}] Incidencia de ${email}`,
       content,
       requesttypes_id: 1,
       urgency: Number(priority) || 3,
@@ -262,8 +363,12 @@ export async function POST(req: Request) {
       imageUrl
     );
 
-    // 3) Crear Tickets GLPI
+    // 3) Crear Tickets GLPI, numerando el ticket (TCK-####) antes de crearlo
+    const glpiSessionToken = await initGlpiSession();
+    const ticketCode = await getNextTicketCode(glpiSessionToken);
     const responseglpi = await createTicketGLPI(
+      glpiSessionToken,
+      ticketCode,
       email,
       issue,
       contract,
@@ -277,6 +382,7 @@ export async function POST(req: Request) {
     console.log("responseglpi ",responseglpi)
     return NextResponse.json({
       message: "Incidencia enviada y tarjeta creada con éxito.",
+      ticketCode,
     });
   } catch (error) {
     console.error("Error general al procesar el ticket:", error);
