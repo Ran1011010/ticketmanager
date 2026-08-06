@@ -43,3 +43,7 @@ next-env.d.ts
 
 # generated script output
 scripts/output/
+
+# scripts de migración puntual (Trello -> GLPI), no van a producción
+scripts/number-historical-tickets.mjs
+scripts/upload-tickets-glpi.mjs
