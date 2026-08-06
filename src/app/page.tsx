@@ -161,7 +161,7 @@ export default function Home() {
   
       if (response.ok) {
         const data = await response.json();
-        setMessage("Ticket enviado con éxito.");
+        setMessage(`Ticket ${data.ticketCode} enviado con éxito.`);
         setFormData(initializeFormData());
         setFile(null); 
         setTimeout(() => setMessage(""), 5000);
@@ -234,7 +234,7 @@ export default function Home() {
                { /* <option value="EFE-NOS">EFE-NOS</option>*/}
                 <option value="EFE-BAR">EFE-Barrancas</option>
                 <option value="EFE-RD">EFE-Radio Comunicaciones</option>
-                <option value="EFE-PAN-2">EFE PAN 2</option>
+               { /*  <option value="EFE-PAN-2">EFE PAN II</option>*/}
                 <option value="EFE-MeliBatuco">EFE Melipilla Batuco</option>
                 <option value="VT">Victoria Temuco</option>                                
                 <option value="administrativos">Administrativos</option>

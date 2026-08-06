@@ -125,6 +125,7 @@ async function getNextTicketCode(sessionToken: string): Promise<string> {
 }
 
 async function sendEmail(
+  ticketCode: string,
   email: string,
   issue: string,
   contract: string,
@@ -161,8 +162,8 @@ async function sendEmail(
     from: process.env.SMTP_USER,
     to: email,
     subject: "Incidencia enviada",
-    text: `Hola! 
-           \nTu ticket ha sido enviado con éxito. 
+    text: `Hola!
+           \nTu ticket ${ticketCode} ha sido enviado con éxito.
            \nEl equipo de soporte se pondrá en contacto contigo lo antes posible.`,
   });
 
@@ -348,10 +349,14 @@ export async function POST(req: Request) {
       imageUrl = upload.secure_url;
     }
 
-    // 1) Enviar email
-    await sendEmail(email, issue, contract, type, day, hour, imageUrl);
+    // 1) Numerar el ticket (TCK-####) consultando GLPI antes de notificar/crear nada
+    const glpiSessionToken = await initGlpiSession();
+    const ticketCode = await getNextTicketCode(glpiSessionToken);
 
-    // 2) Crear tarjeta en Trello
+    // 2) Enviar email (incluyendo el código de ticket al usuario)
+    await sendEmail(ticketCode, email, issue, contract, type, day, hour, imageUrl);
+
+    // 3) Crear tarjeta en Trello
     await createTrelloCard(
       email,
       issue,
@@ -363,9 +368,7 @@ export async function POST(req: Request) {
       imageUrl
     );
 
-    // 3) Crear Tickets GLPI, numerando el ticket (TCK-####) antes de crearlo
-    const glpiSessionToken = await initGlpiSession();
-    const ticketCode = await getNextTicketCode(glpiSessionToken);
+    // 4) Crear Ticket en GLPI
     const responseglpi = await createTicketGLPI(
       glpiSessionToken,
       ticketCode,
