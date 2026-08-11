@@ -1,6 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   images: {
     remotePatterns: [
       {
@@ -16,8 +17,8 @@ const nextConfig: NextConfig = {
     ],
   },
   webpack: (config) => {
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
+    config.resolve.alias = {
+      ...config.resolve.alias,
       canvas: false,
     };
 
