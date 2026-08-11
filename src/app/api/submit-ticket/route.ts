@@ -144,11 +144,12 @@ async function sendEmail(
     },
   });
 
-  const sendTicketEmail = await transporter.sendMail({
+  await transporter.sendMail({
     from: process.env.SMTP_USER,
     to: process.env.SMTP_USER_TO,
-    subject: `Nueva incidencia ${ticketCode} de ${email}`,
-    text: `\nCorreo: ${email}
+    subject: `Nuevo incidencia [${ticketCode}] de ${email}`,
+    text: `\nCódigo: ${ticketCode}
+           \nCorreo: ${email}
            \nContrato: ${contract}
            \nTipo: ${type}
            \nDescripcion: ${issue}
