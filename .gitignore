@@ -41,9 +41,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# generated script output
-scripts/output/
+# scripts de mantenimiento/migración puntual, no van a producción
+/scripts/
 
-# scripts de migración puntual (Trello -> GLPI), no van a producción
-scripts/number-historical-tickets.mjs
-scripts/upload-tickets-glpi.mjs
+# config local de Claude Code (específica de esta máquina)
+/.claude/
